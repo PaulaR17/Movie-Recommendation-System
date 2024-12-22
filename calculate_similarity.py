@@ -4,8 +4,9 @@ import numpy as np #para trabajar con operaciones numericas
 
 df=pd.read_csv("./CSV/tfidf_matrix_with_original.csv") #el dataframe con to do consolidado
 numerical_columns = df.select_dtypes(include=['float64', 'int64']).columns
-
 df_numerical = df[numerical_columns].copy()
+print(df_numerical.head())
+
 similarity_matrix = cosine_similarity(df_numerical) #calculamos la similitud del coseno y lo pone en una matriz cuadrada de tamaño nxn, n número de peliculas, con valores entre 0 (no se parecen en nada) y 1 (idénticos)
 #ahora queremos convertir esta matriz de similitud en un dataframe para insepccion
 similarity_df = pd.DataFrame(similarity_matrix, index=df['title'], columns=df['title'])

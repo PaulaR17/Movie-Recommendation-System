@@ -38,4 +38,4 @@ print("Combined DataFrame shape:", df_combined.shape)
 # Expect (1600, original_num_cols + d)
 
 # 8. Save TF-IDF features alone OR the combined DataFrame to CSV
-df_combined.to_csv("./CSV/tfidf_matrix_with_original.csv", index=False)
+df_combined.to_csv("./CSV/tfidf_combined_matrix.csv", index=False)
