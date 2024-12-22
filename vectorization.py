@@ -17,5 +17,6 @@ tfidf_matrix.toarray --> convierte la matriz en una matriz densa, que se puede c
 columns=tfidf_vectorizer.get_feature_names_out --> obtiene las caracteristicas de las palabras que represetnan las columnas del dataframe
 cada fila correspone a una peli y cada columna tiene el peso TF-IDF de una palabra en esa pelicula
 """
+print(tfidf_vectorizer.get_feature_names_out())
 tfidf_df.to_csv("./CSV/tfidf_matrix_combined.csv", index=False)
 
