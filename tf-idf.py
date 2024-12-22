@@ -32,7 +32,7 @@ tfidf_df = pd.DataFrame(
 
 print("Shape of tfidf_df:", tfidf_df.shape)
 
-# 7. (Optional) If you want to combine TF-IDF columns with all your original columns:
+# 7. Combine TF-IDF columns with all your original columns:
 df_combined = pd.concat([df_preprocess.reset_index(drop=True), tfidf_df], axis=1)
 print("Combined DataFrame shape:", df_combined.shape)
 # Expect (1600, original_num_cols + d)
