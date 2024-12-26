@@ -1,56 +1,57 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 
-# Cargar el dataset
+# Imagen de cabecera
+st.markdown(
+    """
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://via.placeholder.com/1200x300.png?text=Welcome+to+Movie+Recommender" 
+             alt="Movie Recommender Header" style="width: 100%; border-radius: 10px;">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Botón de cierre de sesión
+col1, col2 = st.columns([9, 1])
+with col2:
+    if st.button("Cerrar sesión", key="logout"):
+        st.session_state.current_page = "login"
+        st.session_state.user_data = None
+
+# Leer el archivo peliculas_with_posters.csv
 df = pd.read_csv("./CSV/peliculas_with_posters.csv")
 
-# Configuración de la página
-st.set_page_config(page_title="Movie Recommender", layout="wide")
-st.title("Movie Recommender 🎬")
-st.sidebar.header("Filtros")
+# Validar columnas necesarias
+if 'critic_score' in df.columns and 'people_score' in df.columns and 'poster_url' in df.columns:
+    # Convertir critic_score y people_score a numéricos
+    df['critic_score'] = pd.to_numeric(df['critic_score'], errors='coerce')
+    df['people_score'] = pd.to_numeric(df['people_score'], errors='coerce')
 
-# Filtros
-search_title = st.sidebar.text_input("Buscar por título")
-genre_filter = st.sidebar.multiselect("Filtrar por género", df['genre'].unique())
+    # Calcular la media entre critic_score y people_score
+    df['average_score'] = (df['critic_score'] + df['people_score']) / 2
 
-# Filtrar datos según los filtros aplicados
-filtered_df = df.copy()
-if search_title:
-    filtered_df = filtered_df[filtered_df['title'].str.contains(search_title, case=False, na=False)]
-if genre_filter:
-    filtered_df = filtered_df[filtered_df['genre'].isin(genre_filter)]
+    # Eliminar filas con valores nulos en average_score o poster_url
+    df = df.dropna(subset=['average_score', 'poster_url'])
 
-st.subheader(f"Resultados: {len(filtered_df)} películas encontradas")
+    # Ordenar por la media en orden descendente y seleccionar las 5 mejores
+    popular_movies = df.sort_values(by="average_score", ascending=False).head(5)
 
-# Mostrar películas como tarjetas
-for index, row in filtered_df.iterrows():
-    with st.container():
-        # Tarjeta redondeada con diseño
-        st.markdown(
-            f"""
-            <div style="
-                border-radius: 15px; 
-                background: #f9f9f9; 
-                padding: 20px; 
-                margin: 10px; 
-                box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-                display: flex;
-                align-items: center;
-            ">
-                <div style="flex: 1;">
-                    <img src="{row['poster_url']}" alt="{row['title']}" style="
-                        width: 100%; 
-                        height: auto; 
-                        border-radius: 10px;
-                    ">
+    # Mostrar las películas más populares como tarjetas pequeñas
+    st.subheader("🎥 Películas más populares")
+    cols = st.columns(5)  # 5 columnas para mostrar 5 películas
+    for index, row in enumerate(popular_movies.iterrows()):
+        _, row = row
+        with cols[index]:
+            st.markdown(
+                f"""
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="{row['poster_url']}" alt="{row['title']}" style="width: 80%; border-radius: 10px;">
+                    <h4 style="margin: 10px 0;">{row['title']}</h4>
+                    <p style="margin: 0;"><strong>Media de Ratings:</strong> {row['average_score']:.1f}/10</p>
                 </div>
-                <div style="flex: 2; margin-left: 20px;">
-                    <h3 style="margin: 0;">{row['title']}</h3>
-                    <p style="margin: 5px 0;">
-                        <strong>Media de Ratings:</strong> {(row['critic_rating'] + row['user_rating']) / 2:.1f}/10
-                    </p>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+                """,
+                unsafe_allow_html=True
+            )
+else:
+    st.error("El archivo CSV no contiene las columnas necesarias.")

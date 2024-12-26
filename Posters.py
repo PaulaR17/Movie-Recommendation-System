@@ -1,8 +1,13 @@
 import requests
 import pandas as pd
+from dotenv import load_dotenv
+import os
 
-# TMDB API Key
-API_KEY = "91ad0c05532cf90cc3e5a3cf7b612882"
+# Cargar las variables de entorno
+load_dotenv()
+
+# Leer la API Key desde el archivo .env
+API_KEY = os.getenv("API_KEY")
 # Endpoint base de TMDB
 BASE_URL = "https://api.themoviedb.org/3"
 
@@ -23,7 +28,12 @@ def get_movie_poster(title): #obtener el poster de una peli
 
 
 #cargar el dataset de películas
-df = pd.read_csv("CSV/preprocessed_peliculas.csv")
+df = pd.read_csv("CSV/peliculas.csv")
+duplicates = df[df.duplicated(subset=['title'], keep=False)]
+print("Duplicados encontrados:")
+print(duplicates)
+
+df = df.drop_duplicates(subset=['title'], keep='first')
 #agregar la columna de URLs de posters
 df['poster_url'] = df['title'].apply(get_movie_poster)
 
