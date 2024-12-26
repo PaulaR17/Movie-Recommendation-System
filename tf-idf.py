@@ -1,41 +1,32 @@
-import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import MinMaxScaler
+import pandas as pd
+import numpy as np
 
-# 1. Read the preprocessed DataFrame
-df_preprocess = pd.read_csv("./CSV/preprocessed_peliculas.csv")
-print("Shape of df_preprocess:", df_preprocess.shape)
+# Read the preprocessed DataFrame
+df_preprocessed = pd.read_csv("./CSV/preprocessed_peliculas.csv")
+print("Shape of df_preprocessed:", df_preprocessed.shape)
 
-# 2. Initialize TfidfVectorizer (up to 10,000 features)
+# Identify categorical columns
+categorical_columns = df_preprocessed.select_dtypes(include='object').columns
+
+# Combine all categorical text into a single string per row
+df_preprocessed['combined_text'] = df_preprocessed[categorical_columns].astype(str).agg(' '.join, axis=1)
+
+# Vectorize the combined text column with TF-IDF
 tfidf_vectorizer = TfidfVectorizer(max_features=10000)
+tfidf_matrix = tfidf_vectorizer.fit_transform(df_preprocessed['combined_text'])
 
-# 3. Select categorical columns (object, category, datetime)
-categorical_columns = df_preprocess.select_dtypes(
-    include=['object', 'category', 'datetime']
-).columns
+# Normalize numerical columns
+numerical_columns = df_preprocessed.select_dtypes(include=['float64', 'int64']).columns
+scaler = MinMaxScaler()
+scaled_numerical = scaler.fit_transform(df_preprocessed[numerical_columns])
 
-# 4. Combine all categorical text into a single string per row
-df_preprocess_categorical = df_preprocess[categorical_columns].copy()
-print("Shape of df_preprocess_categorical:", df_preprocess_categorical.shape)
+# Combine the scaled numerical data with the TF-IDF matrix
+combined_features = np.hstack((tfidf_matrix.toarray(), scaled_numerical))
+print("Combined feature matrix shape:", combined_features.shape)
 
-df_preprocess_categorical['combined_text'] = df_preprocess_categorical.astype(str).agg(' '.join, axis=1)
-print("Shape of df_preprocess_categorical:", df_preprocess_categorical.shape)
-
-# 5. Fit the TF-IDF vectorizer and transform the combined text
-tfidf_matrix = tfidf_vectorizer.fit_transform(df_preprocess_categorical['combined_text'])
-print("TF-IDF matrix shape:", tfidf_matrix.shape)
-
-# 6. Convert TF-IDF matrix to DataFrame (dense)
-tfidf_df = pd.DataFrame(
-    tfidf_matrix.toarray(),
-    columns=tfidf_vectorizer.get_feature_names_out()
-)
-
-print("Shape of tfidf_df:", tfidf_df.shape)
-
-# 7. Combine TF-IDF columns with all your original columns:
-df_combined = pd.concat([df_preprocess.reset_index(drop=True), tfidf_df], axis=1)
-print("Combined DataFrame shape:", df_combined.shape)
-# Expect (1600, original_num_cols + d)
-
-# 8. Save TF-IDF features alone OR the combined DataFrame to CSV
-df_combined.to_csv("./CSV/tfidf_combined_matrix.csv", index=False)
+# Save the combined features to a new CSV
+combined_df = pd.DataFrame(combined_features)
+combined_df.to_csv("./CSV/combined_features.csv", index=False)
+print("Combined features saved.")
