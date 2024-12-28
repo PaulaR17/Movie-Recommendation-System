@@ -9,6 +9,17 @@ st.set_page_config(page_title="Movie Recommender", layout="wide")
 # Ruta al archivo de usuarios
 USER_DB = "./CSV/users.csv"
 
+# Mapeo de traducción de géneros
+genre_translation = {
+    "Acción": "action",
+    "Drama": "drama",
+    "Comedia": "comedy",
+    "Aventura": "adventure",
+    "Terror": "horror",
+    "Romance": "romance",
+    "Ciencia Ficción": "sci fi"
+}
+
 # Inicializar base de datos de usuarios
 def init_user_db():
     if not os.path.exists(USER_DB):
@@ -29,10 +40,11 @@ def register_user(username, password, preferences):
     if username in users["username"].values:
         return False, "El nombre de usuario ya existe."
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    translated_preferences = [genre_translation[genre] for genre in preferences]  # Traducir géneros
     new_user = pd.DataFrame([{
         "username": username,
         "password": hashed_password.decode('utf-8'),
-        "preferences": ','.join(preferences),
+        "preferences": ','.join(translated_preferences),
         "rated_movies": ""
     }])
     users = pd.concat([users, new_user], ignore_index=True)
@@ -72,7 +84,7 @@ def show_register():
     st.title("Registro de Usuarios 🎬")
     username = st.text_input("Nombre de usuario", key="register_username")
     password = st.text_input("Contraseña", type="password", key="register_password")
-    preferences = st.multiselect("Tus géneros favoritos", ["Acción", "Drama", "Comedia", "Aventura", "Terror", "Romance", "Ciencia Ficción"], key="register_preferences")
+    preferences = st.multiselect("Tus géneros favoritos", list(genre_translation.keys()), key="register_preferences")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Registrar"):

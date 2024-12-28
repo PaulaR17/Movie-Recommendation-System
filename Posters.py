@@ -1,17 +1,48 @@
 import requests
 import pandas as pd
-from dotenv import load_dotenv
 import os
 
-# Cargar las variables de entorno
-load_dotenv()
+# Leer la API Key desde un archivo local
+with open("api_key.txt", "r") as f:
+    API_KEY = f.read().strip()
 
-# Leer la API Key desde el archivo .env
-API_KEY = os.getenv("API_KEY")
 # Endpoint base de TMDB
 BASE_URL = "https://api.themoviedb.org/3"
 
-def get_movie_poster(title): #obtener el poster de una peli
+# Diccionario para traducir géneros
+GENRE_TRANSLATION = {
+    "acción": "action",
+    "aventura": "adventure",
+    "ciencia ficción": "sci fi",
+    "comedia": "comedy",
+    "drama": "drama",
+    "fantasía": "fantasy",
+    "horror": "horror",
+    "misterio": "mystery and thriller",
+    "romance": "romance",
+    "animación": "animation",
+    "documental": "documentary",
+    "musical": "musical",
+    "historia": "history",
+    "guerra": "war",
+    "crimen": "crime",
+    "infantil": "kids and family",
+    "otros": "other",
+    # Añade más si es necesario
+}
+
+def translate_genres(genres):
+    """Traduce los géneros de español a inglés usando GENRE_TRANSLATION."""
+    if pd.isna(genres):
+        return genres
+    translated_genres = []
+    for genre in genres.split(", "):
+        genre_lower = genre.strip().lower()
+        translated_genres.append(GENRE_TRANSLATION.get(genre_lower, genre_lower))  # Traduce o deja igual si no está en el diccionario
+    return ", ".join(translated_genres)
+
+def get_movie_poster(title):
+    """Obtiene el póster de una película desde la API de TMDB."""
     url = f"{BASE_URL}/search/movie"
     params = {
         "api_key": API_KEY,
@@ -19,23 +50,27 @@ def get_movie_poster(title): #obtener el poster de una peli
     }
     response = requests.get(url, params=params).json()
 
-
-    if response.get("results"):#si hay resultados se obtiene la priemera imagen
+    if response.get("results"):  # Si hay resultados, toma el primer póster
         poster_path = response["results"][0].get("poster_path")
         if poster_path:
-            return f"https://image.tmdb.org/t/p/w500{poster_path}"  # URL completa del poster
+            return f"https://image.tmdb.org/t/p/w500{poster_path}"  # URL completa del póster
     return "No Poster Found"
 
-
-#cargar el dataset de películas
+# Cargar el dataset de películas
 df = pd.read_csv("CSV/peliculas.csv")
+
+# Traducir géneros al inglés
+df["genre"] = df["genre"].apply(translate_genres)
+
+# Eliminar duplicados por título
 duplicates = df[df.duplicated(subset=['title'], keep=False)]
 print("Duplicados encontrados:")
 print(duplicates)
-
 df = df.drop_duplicates(subset=['title'], keep='first')
-#agregar la columna de URLs de posters
+
+# Agregar la columna de URLs de pósters
 df['poster_url'] = df['title'].apply(get_movie_poster)
 
+# Guardar el nuevo dataset
 df.to_csv("./CSV/peliculas_with_posters.csv", index=False)
-print("Posters obtenidos y guardados.")
+print("Posters obtenidos, géneros traducidos y dataset guardado.")
