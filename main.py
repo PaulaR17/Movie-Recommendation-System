@@ -67,12 +67,6 @@ def show_login():
     st.markdown(
         """
         <style>
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
         .stButton > button {
             background-color: #4CAF50;
             color: white;
@@ -81,9 +75,23 @@ def show_login():
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            display: block;
+            margin: 10px auto;
         }
-        .stButton > div:nth-child(2) button {
-            background-color: #008CBA;
+        a {
+            color: #008CBA;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .custom-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .custom-links p {
+            margin: 5px 0;
         }
         </style>
         """,
@@ -99,53 +107,81 @@ def show_login():
         with col_main:
             username = st.text_input("Nombre de usuario", key="login_username")
             password = st.text_input("Contraseña", type="password", key="login_password")
-            st.markdown("<div class='button-container'>", unsafe_allow_html=True)
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                if st.button("Iniciar sesión", key="login_button"):
-                    success, user_data = login_user(username, password)
-                    if success:
-                        st.session_state.current_page = "app"
-                        st.session_state.user_data = user_data
-                    else:
-                        st.error("Usuario o contraseña incorrectos")
-            with col2:
-                if st.button("Registrarse", key="register_button"):
-                    st.session_state.current_page = "register"
-            st.markdown("</div>", unsafe_allow_html=True)
+
+            if st.button("Iniciar sesión", key="login_button"):
+                success, user_data = login_user(username, password)
+                if success:
+                    st.session_state.current_page = "app"
+                    st.session_state.user_data = user_data
+                else:
+                    st.error("Usuario o contraseña incorrectos")
+
+            if st.button("¿No estás registrado? Regístrate aquí", key="register_button"):
+                st.session_state.current_page = "register"
 
     st.markdown(
         """
-        <div style='text-align: center; margin-top: 50px;'>
+        <div class='custom-links'>
             <p>Proyecto final para la asignatura de Sistemas Inteligentes de Paula Romero.</p>
-            <p>Ve el proceso del proyecto en <a href='https://github.com/PaulaR17/Movie-Recommendation-System' target='_blank'>GitHub</a> y lee la <a href='https://docs.google.com/document/d/1-KRpNdHmGUrG_EkNJi9KOBlRVyamncOl53vwGbOv0z4/edit?usp=sharing' target='_blank'>documentación oficial</a>.</p>
+            <p>Ve el proceso del proyecto en <a href='https://github.com/PaulaR17/Movie-Recommendation-System' target='_blank'>GitHub</a></p>
+            <p>Lee la <a href='https://docs.google.com/document/d/1-KRpNdHmGUrG_EkNJi9KOBlRVyamncOl53vwGbOv0z4/edit?usp=sharing' target='_blank'>documentación oficial</a>.</p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 def show_register():
-    st.title("Registro de Usuarios 🎬")
-    username = st.text_input("Nombre de usuario", key="register_username")
-    password = st.text_input("Contraseña", type="password", key="register_password")
-    preferences = st.multiselect("Tus géneros favoritos", list(genre_translation.keys()), key="register_preferences")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Registrar"):
-            if not preferences:
-                st.error("Por favor, selecciona al menos un género favorito.")
-            elif not username or not password:
-                st.error("Por favor, llena todos los campos.")
-            else:
-                success, message = register_user(username, password, preferences)
-                if success:
-                    st.success("¡Registro exitoso! Ahora puedes iniciar sesión.")
-                    st.session_state.current_page = "login"
+    st.markdown(
+        """
+        <style>
+        .stButton > button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 10px auto;
+        }
+        .form-container {
+            text-align: center;
+        }
+        .form-container input {
+            margin: 10px 0;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """<h1 style='text-align: center;'>Registro de Usuarios 🎬</h1>""",
+        unsafe_allow_html=True
+    )
+    with st.container():
+        col_space, col_main, col_space2 = st.columns([1, 2, 1])
+        with col_main:
+            username = st.text_input("Nombre de usuario", key="register_username")
+            password = st.text_input("Contraseña", type="password", key="register_password")
+            preferences = st.multiselect("Tus géneros favoritos", list(genre_translation.keys()), key="register_preferences")
+
+            if st.button("Registrar", key="register_button_submit"):
+                if not preferences:
+                    st.error("Por favor, selecciona al menos un género favorito.")
+                elif not username or not password:
+                    st.error("Por favor, llena todos los campos.")
                 else:
-                    st.error(message)
-    with col2:
-        if st.button("Volver a Iniciar sesión"):
-            st.session_state.current_page = "login"
+                    success, message = register_user(username, password, preferences)
+                    if success:
+                        st.success("¡Registro exitoso! Ahora puedes iniciar sesión.")
+                        st.session_state.current_page = "login"
+                    else:
+                        st.error(message)
+
+            if st.button("Volver a Iniciar sesión", key="register_button_back"):
+                st.session_state.current_page = "login"
 
 def show_app():
     # Agregar lógica principal de la app y botón de cierre de sesión
