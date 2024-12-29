@@ -99,7 +99,7 @@ def show_login():
     )
 
     st.markdown(
-        """<h1 style='text-align: center;'>Sistema de Usuarios 🎬</h1>""",
+        """<h1 style='text-align: center;'>Bienvenido al Recomendador de Películas 🎬</h1>""",
         unsafe_allow_html=True
     )
     with st.container():
@@ -184,11 +184,9 @@ def show_register():
                 st.session_state.current_page = "login"
 
 def show_app():
-    # Agregar lógica principal de la app y botón de cierre de sesión
+    # Llama a la función principal en app.py
     import app
-    if st.button("Cerrar sesión"):
-        st.session_state.current_page = "login"
-        st.session_state.user_data = None
+    app.run_app()  # Llama a la función que define el contenido principal de la app
 
 # Control de estado: página activa
 if "current_page" not in st.session_state:
