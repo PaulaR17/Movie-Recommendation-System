@@ -64,21 +64,65 @@ init_user_db()
 
 # Funciones para alternar vistas
 def show_login():
-    st.title("Sistema de Usuarios 🎬")
-    username = st.text_input("Nombre de usuario", key="login_username")
-    password = st.text_input("Contraseña", type="password", key="login_password")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Iniciar sesión"):
-            success, user_data = login_user(username, password)
-            if success:
-                st.session_state.current_page = "app"
-                st.session_state.user_data = user_data
-            else:
-                st.error("Usuario o contraseña incorrectos")
-    with col2:
-        if st.button("Registrarse"):
-            st.session_state.current_page = "register"
+    st.markdown(
+        """
+        <style>
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stButton > button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .stButton > div:nth-child(2) button {
+            background-color: #008CBA;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        """<h1 style='text-align: center;'>Sistema de Usuarios 🎬</h1>""",
+        unsafe_allow_html=True
+    )
+    with st.container():
+        col_space, col_main, col_space2 = st.columns([1, 2, 1])
+        with col_main:
+            username = st.text_input("Nombre de usuario", key="login_username")
+            password = st.text_input("Contraseña", type="password", key="login_password")
+            st.markdown("<div class='button-container'>", unsafe_allow_html=True)
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                if st.button("Iniciar sesión", key="login_button"):
+                    success, user_data = login_user(username, password)
+                    if success:
+                        st.session_state.current_page = "app"
+                        st.session_state.user_data = user_data
+                    else:
+                        st.error("Usuario o contraseña incorrectos")
+            with col2:
+                if st.button("Registrarse", key="register_button"):
+                    st.session_state.current_page = "register"
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div style='text-align: center; margin-top: 50px;'>
+            <p>Proyecto final para la asignatura de Sistemas Inteligentes de Paula Romero.</p>
+            <p>Ve el proceso del proyecto en <a href='https://github.com/PaulaR17/Movie-Recommendation-System' target='_blank'>GitHub</a> y lee la <a href='https://docs.google.com/document/d/1-KRpNdHmGUrG_EkNJi9KOBlRVyamncOl53vwGbOv0z4/edit?usp=sharing' target='_blank'>documentación oficial</a>.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 def show_register():
     st.title("Registro de Usuarios 🎬")
