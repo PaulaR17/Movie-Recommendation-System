@@ -34,7 +34,7 @@ GENRE_TRANSLATION = {
 def translate_genres(genres):
     """Traduce los géneros de español a inglés usando GENRE_TRANSLATION."""
     if pd.isna(genres):
-        return genres
+        return "Desconocido"  # Reemplazar géneros nulos por 'Desconocido'
     translated_genres = []
     for genre in genres.split(", "):
         genre_lower = genre.strip().lower()
@@ -68,9 +68,22 @@ print("Duplicados encontrados:")
 print(duplicates)
 df = df.drop_duplicates(subset=['title'], keep='first')
 
+# Rellenar valores nulos
+categorical_columns = df.select_dtypes(include="object").columns
+numerical_columns = df.select_dtypes(include=["int64", "float64"]).columns
+
+df[categorical_columns] = df[categorical_columns].fillna("Desconocido")  # Textos como 'Desconocido'
+df[numerical_columns] = df[numerical_columns].fillna(0)  # Valores numéricos como 0
+
+# Calcular 'average_score'
+if "critic_score" in df.columns and "people_score" in df.columns:
+    df["average_score"] = (df["critic_score"] + df["people_score"]) / 2
+else:
+    df["average_score"] = 0  # Si no existen las columnas, inicializar como 0
+
 # Agregar la columna de URLs de pósters
 df['poster_url'] = df['title'].apply(get_movie_poster)
 
 # Guardar el nuevo dataset
 df.to_csv("./CSV/peliculas_with_posters.csv", index=False)
-print("Posters obtenidos, géneros traducidos y dataset guardado.")
+print("Posters obtenidos, géneros traducidos, nulos manejados, promedio calculado y dataset guardado.")

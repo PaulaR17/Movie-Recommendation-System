@@ -201,3 +201,6 @@ elif st.session_state.current_page == "register":
     show_register()
 elif st.session_state.current_page == "app":
     show_app()
+elif st.session_state.current_page == "movie_details":  # Nueva condición
+    import movie_details
+    movie_details.show_movie_details()  # Llamar a la función de detalles de la película
