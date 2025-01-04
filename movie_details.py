@@ -8,6 +8,10 @@ def show_movie_details():
         st.error("No se seleccionó ninguna película.")
         st.stop()
 
+    if st.button("Volver atrás", key="back_button"):
+        st.session_state.current_page = "app"  # Cambiar a la página principal
+        st.experimental_rerun()  # Recargar la página
+
     # Cargar el dataset
     df = pd.read_csv("./CSV/peliculas_with_posters.csv")
 

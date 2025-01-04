@@ -1,16 +1,13 @@
-import streamlit as st
-import pandas as pd
-import bcrypt
-import os
+import streamlit as st #importamos streamlit que es lo que usaremos para hacer la interfaz
+import pandas as pd #importamos pandas, que lo usaremos para trabajar con CSVs
+import bcrypt #importamos bycript que nos servira para encriptar contraseñas
+import os #importamos os para trabajar con funciones del sistema operativo
 
-# Configuración de la página
-st.set_page_config(page_title="Movie Recommender", layout="wide")
 
-# Ruta al archivo de usuarios
-USER_DB = "./CSV/users.csv"
+st.set_page_config(page_title="Recomendador de peliculas", layout="wide") #configuramos el titulo y el diseño de la pagina principal
+USER_DB = "./CSV/users.csv" #ruta al archivo de usuarios
 
-# Mapeo de traducción de géneros
-genre_translation = {
+genre_translation = { #traducimos los generos del ingles al español para asegurar una uniformidad
     "Acción": "action",
     "Drama": "drama",
     "Comedia": "comedy",
@@ -20,28 +17,27 @@ genre_translation = {
     "Ciencia Ficción": "sci fi"
 }
 
-# Inicializar base de datos de usuarios
+#-------------------------------USUARIOS------------------------------------
+#inicializam base de datos de usuarios
 def init_user_db():
-    if not os.path.exists(USER_DB):
+    if not os.path.exists(USER_DB): #miramos si users.csv existe, si no existe lo creamos con las columnas vacias
         user_df = pd.DataFrame(columns=["username", "password", "preferences", "rated_movies"])
         user_df.to_csv(USER_DB, index=False)
 
-# Cargar usuarios
+#cargamos los usuarios
 def load_users():
-    return pd.read_csv(USER_DB)
-
-# Guardar usuarios
+    return pd.read_csv(USER_DB) #leemos el csv de los usuarios
 def save_users(users_df):
-    users_df.to_csv(USER_DB, index=False)
+    users_df.to_csv(USER_DB, index=False) #guardamos los usuarios cargados en un csv
 
-# Registro de usuario
+#tema de registro de usuario
 def register_user(username, password, preferences):
-    users = load_users()
-    if username in users["username"].values:
+    users = load_users() #cargamos los usuarios
+    if username in users["username"].values: #si el usuario ya existe en el csv
         return False, "El nombre de usuario ya existe."
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    translated_preferences = [genre_translation[genre] for genre in preferences]  # Traducir géneros
-    new_user = pd.DataFrame([{
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()) #haseamos la contraseña
+    translated_preferences = [genre_translation[genre] for genre in preferences]  #traducimos los generos que le gustan al usuario
+    new_user = pd.DataFrame([{ #añadimos al nuevo usuario al dataframe de usuarios
         "username": username,
         "password": hashed_password.decode('utf-8'),
         "preferences": ','.join(translated_preferences),
@@ -51,18 +47,18 @@ def register_user(username, password, preferences):
     save_users(users)
     return True, "Registro exitoso."
 
-# Validar inicio de sesión
+#inicio de sesión
 def login_user(username, password):
-    users = load_users()
-    user = users[users["username"] == username]
-    if not user.empty and bcrypt.checkpw(password.encode('utf-8'), user.iloc[0]["password"].encode('utf-8')):
+    users = load_users() #cargamos los usuarios
+    user = users[users["username"] == username] #comprobamos si el username está en la lista de usuarios
+    if not user.empty and bcrypt.checkpw(password.encode('utf-8'), user.iloc[0]["password"].encode('utf-8')): #mirar si la contraseña coinicde con la de la base de datos
         return True, user.iloc[0]
     return False, "Nombre de usuario o contraseña incorrectos."
 
-# Inicializar base de datos
+#inicializar base de datos
 init_user_db()
 
-# Funciones para alternar vistas
+#funciones para alternar vistas
 def show_login():
     st.markdown(
         """
@@ -111,15 +107,15 @@ def show_login():
             if st.button("Iniciar sesión", key="login_button"):
                 success, user_data = login_user(username, password)
                 if success:
-                    st.session_state.current_page = "app"
+                    st.session_state.current_page = "app" #cambiamos a la app
                     st.session_state.user_data = user_data
                 else:
                     st.error("Usuario o contraseña incorrectos")
 
             if st.button("¿No estás registrado? Regístrate aquí", key="register_button"):
-                st.session_state.current_page = "register"
+                st.session_state.current_page = "register" #cambiamos a la pagina de registro
 
-    st.markdown(
+    st.markdown( #texto final
         """
         <div class='custom-links'>
             <p>Proyecto final para la asignatura de Sistemas Inteligentes de Paula Romero.</p>
