@@ -5,7 +5,7 @@ original_csv_path = "CSV/peliculas.csv"
 original_df = pd.read_csv(original_csv_path)
 
 # Load updated similarity matrix
-similarity_matrix_path = "CSV/updated_similarity_matrix.csv"
+similarity_matrix_path = "CSV/cleaned_similarity_matrix.csv"
 updated_similarity_df = pd.read_csv(similarity_matrix_path)
 
 # Map the original titles to the similarity matrix

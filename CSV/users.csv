@@ -1,6 +1,7 @@
 username,password,preferences,rated_movies
 Paula,$2b$12$.S4eQ00MpEop37TEZxThqePY1FoKcZ1X5v5OLAw0jhWgehw.4w8Ri,"romance,horror",
 try,$2b$12$vdb9yV3kWGz5992SZdjnq.xRtIaZEUV4DaNH5yoskbTM/qFPVweXi,adventure,
-1,$2b$12$40Z8bW8Kt5cHKSyqaFWJoOVldnR.WSKycfYS6cFHnumqorPC8bM8.,action,"{520: 3, 311: 5}"
-2,$2b$12$jc2UXngW7i27IkgWihLume1tfP9PU6VMMvJ9/LBW7BEx5tppYvDp2,"horror,action,sci fi",
+1,$2b$12$40Z8bW8Kt5cHKSyqaFWJoOVldnR.WSKycfYS6cFHnumqorPC8bM8.,action,"{78: 3, 352: 2, 1: 5, 351: 3, 530: 5}"
+2,$2b$12$jc2UXngW7i27IkgWihLume1tfP9PU6VMMvJ9/LBW7BEx5tppYvDp2,"horror,action,sci fi","{5: 2, 412: 5, 417: 1}"
 3,$2b$12$58NpKPjK00ee/JPgSxx/a.sBDwKxoLZ7xowgzKqKJwnxaIbfJeehi,"comedy,sci fi,action",
+pau,$2b$12$BSL5t5jPyVRIUZbFKsfzpOZw9dHoylTss2CNJcAkt7obk2Bm3bJxW,romance,

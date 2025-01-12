@@ -12,5 +12,5 @@ similarity_matrix = cosine_similarity(df_features)
 similarity_df = pd.DataFrame(similarity_matrix, index=df_titles, columns=df_titles)
 
 # Save the updated similarity matrix
-similarity_df.to_csv("./CSV/updated_similarity_matrix.csv", index=True)
-print("Updated similarity matrix saved as 'updated_similarity_matrix.csv'")
+similarity_df.to_csv("./CSV/cleaned_similarity_matrix.csv", index=True)
+print("Updated similarity matrix saved as 'cleaned_similarity_matrix.csv'")
