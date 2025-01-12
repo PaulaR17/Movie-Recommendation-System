@@ -1,9 +1,9 @@
 import pandas as pd
 
-# Ruta al archivo de usuarios
+#ruta al archivo de usuarios
 USER_DB = "./CSV/users.csv"
 
-# Mapeo de traducción de géneros
+#mapeo de traducción de géneros
 genre_translation = {
     "Acción": "action",
     "Drama": "drama",
@@ -14,10 +14,10 @@ genre_translation = {
     "Ciencia Ficción": "sci fi"
 }
 
-# Cargar usuarios
+#cargar usuarios
 users_df = pd.read_csv(USER_DB)
 
-# Traducir géneros
+#traducir géneros
 def translate_preferences(preferences):
     if pd.isna(preferences):
         return ""
@@ -26,6 +26,6 @@ def translate_preferences(preferences):
 
 users_df["preferences"] = users_df["preferences"].apply(translate_preferences)
 
-# Guardar los cambios
+#guardar los cambios
 users_df.to_csv(USER_DB, index=False)
 print("Preferencias actualizadas al inglés.")
