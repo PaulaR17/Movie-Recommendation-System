@@ -4,17 +4,31 @@ import pandas as pd
 def run_app():
     # Cargar datos
     peliculas_path = './CSV/peliculas_with_posters.csv'
+    user_db_path = './CSV/users.csv'
     similarity_matrix_path = './CSV/cleaned_similarity_matrix.csv'
 
     peliculas_df = pd.read_csv(peliculas_path)
     peliculas_df.reset_index(inplace=True)  # Añadimos un índice numérico único
     peliculas_df["title_normalized"] = peliculas_df["title"].str.strip().str.lower()
 
+    users_df = pd.read_csv(user_db_path)
+
     similarity_matrix_df = pd.read_csv(similarity_matrix_path).set_index('id')
 
     # Asegurar que los índices en la matriz de similitud sean cadenas
     similarity_matrix_df.index = similarity_matrix_df.index.astype(str)
     similarity_matrix_df.columns = similarity_matrix_df.columns.astype(str)
+
+    # Convertir todos los valores de la matriz de similitud a tipo float, manejando errores
+    similarity_matrix_df = similarity_matrix_df.apply(pd.to_numeric, errors='coerce')
+
+    # Eliminar filas y columnas completamente vacías o no numéricas
+    similarity_matrix_df = similarity_matrix_df.dropna(how='all', axis=0)
+    similarity_matrix_df = similarity_matrix_df.dropna(how='all', axis=1)
+
+    # Normalizar los valores de la matriz de similitud
+    if not similarity_matrix_df.empty:
+        similarity_matrix_df = similarity_matrix_df / similarity_matrix_df.max().max()
 
     # Validar que los IDs de similarity_matrix_df estén en peliculas_df
     valid_ids = peliculas_df['id'].astype(str).tolist()
@@ -36,6 +50,15 @@ def run_app():
         rated_movies[index] = puntuacion
         current_user["rated_movies"] = str(rated_movies)
 
+        # Guardar en el CSV
+        user_row = users_df[users_df["username"] == current_user["username"]]
+        if not user_row.empty:
+            users_df.loc[user_row.index, "rated_movies"] = current_user["rated_movies"]
+            users_df.to_csv(user_db_path, index=False)
+            st.success(f"Puntuación de {puntuacion} estrellas guardada para la película con índice {index}.")
+        else:
+            st.error("No se pudo guardar la puntuación en el archivo de usuarios.")
+
     # Función para obtener recomendaciones basadas en puntuaciones
     def obtener_recomendaciones():
         if "rated_movies" not in current_user or pd.isna(current_user["rated_movies"]):
@@ -44,16 +67,16 @@ def run_app():
         rated_movies = eval(current_user["rated_movies"])
         recomendaciones = {}
 
-        for index, rating in rated_movies.items():
-            rating = float(rating)
-            if str(index) in similarity_matrix_df.index:
-                similares = similarity_matrix_df.loc[str(index)]
-                for pelicula, similitud in similares.items():
-                    similitud = float(similitud)
-                    if pelicula not in rated_movies:
-                        if pelicula not in recomendaciones:
-                            recomendaciones[pelicula] = 0
-                        recomendaciones[pelicula] += similitud * rating
+        for pelicula_id in similarity_matrix_df.index:
+            if pelicula_id not in rated_movies:
+                similitudes = similarity_matrix_df.loc[pelicula_id]
+                puntuacion_acumulada = sum(
+                    float(rated_movies.get(str(rated_pelicula), 0)) * similitud
+                    for rated_pelicula, similitud in similitudes.items()
+                    if str(rated_pelicula) in rated_movies and similitud > 0.7
+                )
+                if puntuacion_acumulada > 0:
+                    recomendaciones[pelicula_id] = puntuacion_acumulada
 
         recomendaciones_ordenadas = sorted(recomendaciones.items(), key=lambda x: x[1], reverse=True)
         valid_recommendations = [rec[0] for rec in recomendaciones_ordenadas if rec[0] in peliculas_df['id'].astype(str).values]
